@@ -16,7 +16,7 @@ public class WeatherService implements WeatherServiceInterface{
     private String weatherApi;
 
     @Override
-    public Weather fetchCityWeather(String city) {
+    public void fetchCityWeather(String city) {
         RestTemplate restTemplate = new RestTemplate();
         try {
             UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(weatherApi)
@@ -27,9 +27,7 @@ public class WeatherService implements WeatherServiceInterface{
                     .queryParam("key", apiKey);
 
             ResponseEntity<Weather> response = restTemplate.getForEntity(builder.toUriString(), Weather.class);
-            return response.getBody();
         }catch(Exception exc){
-            System.out.println(exc.getMessage());
             throw exc;
         }
     }

@@ -17,8 +17,16 @@ public class WeatherApi {
     }
 
     @PostMapping("/save/{city}")
-    public ResponseEntity<Weather> saveCityForecast(@PathVariable String city){
-        return new ResponseEntity<>(weatherService.fetchCityWeather(city), HttpStatus.OK);
+    public ResponseEntity<String> saveCityForecast(@PathVariable String city){
+        try{
+            weatherService.fetchCityWeather(city);
+            return new ResponseEntity<>(String.format("%s weather saved", city), HttpStatus.OK);
+        }catch (Exception exc){
+            if (exc.getMessage().contains("No matching location found")) {
+                return new ResponseEntity<>(String.format("%s not found", city), HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>("error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/retrieve/{city}")
