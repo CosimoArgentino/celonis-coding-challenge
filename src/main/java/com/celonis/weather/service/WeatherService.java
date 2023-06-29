@@ -1,8 +1,8 @@
 package com.celonis.weather.service;
 
-import com.celonis.weather.model.Day;
-import com.celonis.weather.model.Forecastday;
-import com.celonis.weather.model.Weather;
+import com.celonis.weather.model.forecast.Day;
+import com.celonis.weather.model.forecast.Forecastday;
+import com.celonis.weather.model.forecast.Weather;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

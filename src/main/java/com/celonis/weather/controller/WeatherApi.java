@@ -1,6 +1,6 @@
 package com.celonis.weather.controller;
 
-import com.celonis.weather.model.Weather;
+import com.celonis.weather.model.forecast.Weather;
 import com.celonis.weather.service.WeatherServiceInterface;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

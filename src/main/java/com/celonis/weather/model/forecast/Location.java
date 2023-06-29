@@ -1,4 +1,4 @@
-package com.celonis.weather.model;
+package com.celonis.weather.model.forecast;
 
 public class Location {
     private String name;

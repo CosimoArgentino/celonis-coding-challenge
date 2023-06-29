@@ -1,9 +1,6 @@
-package com.celonis.weather.model;
+package com.celonis.weather.model.forecast;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.Date;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Weather {
