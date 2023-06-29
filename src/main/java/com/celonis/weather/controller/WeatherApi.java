@@ -18,6 +18,7 @@ public class WeatherApi {
 
     @PostMapping("/save/{city}")
     public ResponseEntity<String> saveCityForecast(@PathVariable String city){
+        //TODO all responses from weather api documentation
         try{
             weatherService.fetchCityWeather(city);
             return new ResponseEntity<>(String.format("%s weather saved", city), HttpStatus.OK);
