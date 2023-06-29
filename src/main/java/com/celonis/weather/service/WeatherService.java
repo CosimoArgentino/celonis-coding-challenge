@@ -8,7 +8,6 @@ public class WeatherService implements WeatherServiceInterface{
 
     @Override
     public Weather fetchCityWeather(String city) {
-        System.out.println("bo");
         return null;
     }
 }
