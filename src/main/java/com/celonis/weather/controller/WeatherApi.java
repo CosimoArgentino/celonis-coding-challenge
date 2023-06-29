@@ -2,6 +2,7 @@ package com.celonis.weather.controller;
 
 import com.celonis.weather.model.Weather;
 import com.celonis.weather.service.WeatherServiceInterface;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +17,8 @@ public class WeatherApi {
     }
 
     @PostMapping("/save/{city}")
-    public ResponseEntity<String> saveCityForecast(@PathVariable String city){
-        return null;
+    public ResponseEntity<Weather> saveCityForecast(@PathVariable String city){
+        return new ResponseEntity<>(weatherService.fetchCityWeather(city), HttpStatus.OK);
     }
 
     @GetMapping("/retrieve/{city}")
