@@ -53,17 +53,22 @@ public class WeatherService implements WeatherServiceInterface{
 
     private void checkAndAddToCache(Weather weather){
         String city = weather.getLocation().getCountry();
+        List<Forecastday> forecast = weather.getForecast().getForecastday();
         if (cache.containsKey(city)){
             Map<Date, Day> days = cache.get(city);
-
-            List<Forecastday> forecast = weather.getForecast().getForecastday();
-
             for(Forecastday f : forecast){
                 if (days.containsKey(f.getDate())){
                     continue;
                 }
                 days.put(f.getDate(), f.getDay());
             }
+            return;
         }
+
+        Map<Date, Day> m = new HashMap<>();
+        forecast.forEach(f -> {
+            m.put(f.getDate(), f.getDay());
+        });
+        cache.put(city, m);
     }
 }
