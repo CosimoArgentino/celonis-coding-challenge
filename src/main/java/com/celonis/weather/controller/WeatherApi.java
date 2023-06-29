@@ -29,8 +29,13 @@ public class WeatherApi {
         }
     }
 
-    @GetMapping("/retrieve/{city}")
+    @GetMapping("/fetch/{city}")
     @ResponseBody public ResponseEntity<Weather> getForecastForCity(@PathVariable String city){
+        return null;
+    }
+
+    @GetMapping("/fetch")
+    @ResponseBody public ResponseEntity<Weather> getAllForecast(@PathVariable String city){
         return null;
     }
 
