@@ -22,7 +22,7 @@ import java.util.*;
 @Service
 public class WeatherService implements WeatherServiceInterface{
 
-    private Cache<String, ForecastEntity> cache;
+    private final Cache<String, ForecastEntity> cache;
     private final static Logger logger = LoggerFactory.getLogger(WeatherService.class);
     private IWeatherDAO weatherDAO;
     @Value("${apiKey}")
@@ -96,10 +96,13 @@ public class WeatherService implements WeatherServiceInterface{
     @Override
     public Set<ForecastPresentationDTO> fetchAll() {
         Set<String> keys = cache.asMap().keySet();
+
         LocalDate now = LocalDate.now();
         String today = now.toString();
         String tomorrow = now.plusDays(1).toString();
+
         SortedSet<ForecastPresentationDTO> weathers = new TreeSet<>();
+
         for(String key : keys){
 
             String cityName = key.substring(10);
