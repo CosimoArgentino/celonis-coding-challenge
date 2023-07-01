@@ -1,13 +1,11 @@
 package com.celonis.weather.model.forecast;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.sql.Date;
 
 @Entity
+@Table(name = "forecast", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "date"})})
 public class ForecastEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

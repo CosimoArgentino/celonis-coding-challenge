@@ -70,8 +70,9 @@ public class WeatherService implements WeatherServiceInterface{
         }
 
         List<ForecastEntity> weatherEntities = weather.toEntity();
-        return checkAndAddToCache(weatherEntities);
-        //weatherDAO.saveAll(weatherEntities);
+        SaveStatus status =  checkAndAddToCache(weatherEntities);
+        weatherDAO.saveAll(weatherEntities);
+        return status;
     }
 
     @Override
