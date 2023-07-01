@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -98,13 +99,17 @@ public class WeatherService implements WeatherServiceInterface{
     @Override
     public List<ForecastPresentationDTO> fetchAll() {
         Set<String> keys = cache.asMap().keySet();
+
         LocalDate now = LocalDate.now();
         String today = now.toString();
         String tomorrow = now.plusDays(1).toString();
-        List<ForecastPresentationDTO> weathers = new ArrayList<>();
-        for(String key : keys){
 
-            String cityName = key.substring(10);
+        List<ForecastPresentationDTO> weathers = new ArrayList<>();
+        Set<String> cityNames = keys.stream()
+                .map(k->k.substring(10))
+                .collect(Collectors.toSet());
+
+        for(String cityName : cityNames){
             String todayKey = today+cityName;
             String tomorrowKey = tomorrow+cityName;
 
