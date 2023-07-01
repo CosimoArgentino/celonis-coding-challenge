@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/weather/forecast")
@@ -45,8 +46,8 @@ public class WeatherApi {
     }
 
     @GetMapping("/fetch")
-    @ResponseBody public ResponseEntity<List<ForecastPresentationDTO>> getAllForecast(){
-        List<ForecastPresentationDTO> forecasts = weatherService.fetchAll();
+    @ResponseBody public ResponseEntity<Set<ForecastPresentationDTO>> getAllForecast(){
+        Set<ForecastPresentationDTO> forecasts = weatherService.fetchAll();
         if (forecasts.size() == 0){
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }

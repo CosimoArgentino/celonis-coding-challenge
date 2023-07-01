@@ -16,11 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 
 @Service
@@ -75,6 +71,7 @@ public class WeatherService implements WeatherServiceInterface{
 
         List<ForecastEntity> weatherEntities = weather.toEntity();
         return checkAndAddToCache(weatherEntities);
+        //weatherDAO.saveAll(weatherEntities);
     }
 
     @Override
@@ -97,19 +94,15 @@ public class WeatherService implements WeatherServiceInterface{
     }
 
     @Override
-    public List<ForecastPresentationDTO> fetchAll() {
+    public Set<ForecastPresentationDTO> fetchAll() {
         Set<String> keys = cache.asMap().keySet();
-
         LocalDate now = LocalDate.now();
         String today = now.toString();
         String tomorrow = now.plusDays(1).toString();
+        SortedSet<ForecastPresentationDTO> weathers = new TreeSet<>();
+        for(String key : keys){
 
-        List<ForecastPresentationDTO> weathers = new ArrayList<>();
-        Set<String> cityNames = keys.stream()
-                .map(k->k.substring(10))
-                .collect(Collectors.toSet());
-
-        for(String cityName : cityNames){
+            String cityName = key.substring(10);
             String todayKey = today+cityName;
             String tomorrowKey = tomorrow+cityName;
 
@@ -124,7 +117,6 @@ public class WeatherService implements WeatherServiceInterface{
             }
         }
 
-        weathers.sort(Comparator.comparing(k->k.getName()));
         return weathers;
     }
 

@@ -4,7 +4,7 @@ import com.celonis.weather.model.forecast.ForecastEntity;
 
 import java.sql.Date;
 
-public class ForecastPresentationDTO {
+public class ForecastPresentationDTO implements Comparable<ForecastPresentationDTO>{
     private String name;
     private Date date;
     private double maxTempC;
@@ -97,5 +97,10 @@ public class ForecastPresentationDTO {
     public static ForecastPresentationDTO fromEntity(ForecastEntity entity){
         return new ForecastPresentationDTO(entity.getName(), entity.getDate(), entity.getMaxTempC(), entity.getMinTempC(),
         entity.getTotalPrecipMM(), entity.getTotalSnowMM(), entity.getAvgHumidity(), entity.getCondition());
+    }
+
+    @Override
+    public int compareTo(ForecastPresentationDTO o) {
+        return this.getName().compareTo(o.getName());
     }
 }
