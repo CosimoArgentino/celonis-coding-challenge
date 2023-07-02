@@ -4,6 +4,7 @@ import com.celonis.weather.dto.ForecastPresentationDTO;
 import com.celonis.weather.service.SaveStatus;
 import com.celonis.weather.service.IForecastService;
 import com.celonis.weather.service.exception.ForecastLocationNotFoundException;
+import com.celonis.weather.service.exception.WeatherApiException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +32,8 @@ public class ForecastApiController {
             return new ResponseEntity<>(String.format("%s weather %s", city, status.name()), HttpStatus.CREATED);
         }catch (ForecastLocationNotFoundException exc){
             return new ResponseEntity<>(String.format("%s not valid", city), HttpStatus.BAD_REQUEST);
-        }catch (RuntimeException exc){
-            return new ResponseEntity<>(String.format("error: %s", exc.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }catch (WeatherApiException exc){
+            return new ResponseEntity<>("error on weather api %s", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

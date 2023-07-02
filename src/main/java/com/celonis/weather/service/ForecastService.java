@@ -6,6 +6,7 @@ import com.celonis.weather.dto.WeatherApiDTO;
 import com.celonis.weather.model.forecast.ForecastEntity;
 import com.celonis.weather.repository.IForecastDAO;
 import com.celonis.weather.service.exception.ForecastLocationNotFoundException;
+import com.celonis.weather.service.exception.WeatherApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,8 +74,9 @@ public class ForecastService implements IForecastService {
                 logger.error(errorMessage, city);
                 throw new ForecastLocationNotFoundException(errorMessage, exc);
             }
-            logger.error(String.format("error on fetching weather for %s, error message: %s", city, exc.getMessage()));
-            throw exc;
+            String errorMessage = String.format("error on fetching weather for %s, error message: %s", city, exc.getMessage());
+            logger.error(errorMessage);
+            throw new WeatherApiException(errorMessage, exc);
         }
     }
 
