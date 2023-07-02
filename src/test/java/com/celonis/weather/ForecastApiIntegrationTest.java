@@ -1,5 +1,6 @@
 package com.celonis.weather;
 
+import com.celonis.weather.cache.ICaffeineCache;
 import com.celonis.weather.repository.IForecastDAO;
 import jakarta.transaction.Transactional;
 import org.hamcrest.Matchers;
@@ -33,17 +34,22 @@ public class ForecastApiIntegrationTest {
     private MockMvc mvc;
 
     @Autowired
+    ICaffeineCache cache;
+
+    @Autowired
     IForecastDAO forecastDAO;
 
     @Test
     public void testSave_ExistingCity_status201() throws Exception {
         LocalDate date = LocalDate.now();
-        mvc.perform(post(String.format("/weather/forecast/save/Madrid?date=%s", date.toString()))
+        String cityName = "Madrid";
+        mvc.perform(post(String.format("/weather/forecast/save/%s?date=%s", cityName, date.toString()))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
-        //long deleted = forecastDAO.deleteByName("Madrid");
-        //Assert.assertEquals(2, deleted);
+        long deleted = forecastDAO.deleteByName(cityName);
+        Assert.assertEquals(2, deleted);
+        cache.invalidateAll();
     }
 
     @Test
@@ -55,7 +61,9 @@ public class ForecastApiIntegrationTest {
 
     @Test
     public void testFetch_ExistingCity_status200() throws Exception {
-        mvc.perform(post("/weather/forecast/save/Madrid")
+        String cityName = "Madrid";
+
+        mvc.perform(post(String.format("/weather/forecast/save/%s", cityName))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
@@ -66,10 +74,14 @@ public class ForecastApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", Matchers.hasSize(2)))
-                .andExpect(jsonPath("$[0].name", Matchers.is("Madrid")))
+                .andExpect(jsonPath("$[0].name", Matchers.is(cityName)))
                 .andExpect(jsonPath("$[0].date", Matchers.is(now.toString())))
-                .andExpect(jsonPath("$[1].name", Matchers.is("Madrid")))
+                .andExpect(jsonPath("$[1].name", Matchers.is(cityName)))
                 .andExpect(jsonPath("$[1].date", Matchers.is(now.plusDays(1).toString())));
+
+        long deleted = forecastDAO.deleteByName(cityName);
+        Assert.assertEquals(2, deleted);
+        cache.invalidateAll();
     }
 
     @Test

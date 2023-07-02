@@ -36,4 +36,11 @@ public class CaffeineCache implements ICaffeineCache{
     public Set<String> getAllKeys() {
         return cache.asMap().keySet();
     }
+
+    @Override
+    public void invalidateAll() {
+        cache.invalidateAll();
+    }
+
+
 }

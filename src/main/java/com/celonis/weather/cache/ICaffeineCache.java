@@ -8,4 +8,6 @@ public interface ICaffeineCache {
     ForecastEntity getIfPresent(String key);
     ForecastEntity addIfNotPresent(String key, ForecastEntity forecast);
     Set<String> getAllKeys();
+
+    void invalidateAll();
 }

@@ -71,7 +71,9 @@ public class ForecastService implements IForecastService {
 
         List<ForecastEntity> forecastEntities = weather.toEntity();
         SaveStatus status =  checkAndAddToCache(forecastEntities);
+
         forecastDAO.saveAll(forecastEntities);
+
         return status;
     }
 
