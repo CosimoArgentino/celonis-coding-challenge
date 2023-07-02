@@ -101,6 +101,8 @@ public class ForecastPresentationDTO implements Comparable<ForecastPresentationD
 
     @Override
     public int compareTo(ForecastPresentationDTO o) {
-        return this.getName().compareTo(o.getName());
+        String thisKey = this.name + this.date.toString();
+        String compareKey = o.getName() + o.getDate().toString();
+        return thisKey.compareTo(compareKey);
     }
 }
