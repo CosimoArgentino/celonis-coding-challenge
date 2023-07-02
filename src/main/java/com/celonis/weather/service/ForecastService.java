@@ -61,7 +61,7 @@ public class ForecastService implements IForecastService {
             weather = response.getBody();
         }catch(RuntimeException exc){
             if(exc.getMessage().contains("No matching location found")){
-                String errorMessage = String.format("city %s not found on wather api");
+                String errorMessage = String.format("city %s not found on weather api", city);
                 logger.error(errorMessage, city);
                 throw new ForecastLocationNotFoundException(errorMessage, exc);
             }
@@ -87,9 +87,17 @@ public class ForecastService implements IForecastService {
 
         List<ForecastPresentationDTO> dtos = new ArrayList<>();
 
-        checkFromDbIfNullAndAddToCacheAndDtos(city, now, todayKey, todayWeather, dtos);
+        if (todayWeather != null){
+            dtos.add(ForecastPresentationDTO.fromEntity(todayWeather));
+        }else{
+            checkFromDbAndAddToCacheAndDtos(city, now, todayKey, dtos);
+        }
 
-        checkFromDbIfNullAndAddToCacheAndDtos(city, tomorrow, todayKey, tomorrowWeather, dtos);
+        if (tomorrowWeather != null){
+            dtos.add(ForecastPresentationDTO.fromEntity(tomorrowWeather));
+        }else{
+            checkFromDbAndAddToCacheAndDtos(city, tomorrow, tomorrowKey, dtos);
+        }
 
         return dtos;
     }
@@ -114,9 +122,17 @@ public class ForecastService implements IForecastService {
             ForecastEntity todayForecast = cache.getIfPresent(todayKey);
             ForecastEntity tomorrowForecast = cache.getIfPresent(tomorrowKey);
 
-            checkFromDbIfNullAndAddToCacheAndDtos(cityName, now, todayKey, todayForecast, forecasts);
+            if(todayForecast != null){
+                forecasts.add(ForecastPresentationDTO.fromEntity(todayForecast));
+            }else{
+                checkFromDbAndAddToCacheAndDtos(cityName, now, todayKey, forecasts);
+            }
 
-            checkFromDbIfNullAndAddToCacheAndDtos(cityName, tomorrow, tomorrowKey, tomorrowForecast, forecasts);
+            if(tomorrowForecast != null){
+                forecasts.add(ForecastPresentationDTO.fromEntity(tomorrowForecast));
+            }else{
+                checkFromDbAndAddToCacheAndDtos(cityName, tomorrow, tomorrowKey, forecasts);
+            }
         }
 
         return forecasts;
@@ -135,15 +151,11 @@ public class ForecastService implements IForecastService {
         return status;
     }
 
-    private void checkFromDbIfNullAndAddToCacheAndDtos(String city, LocalDate now, String todayKey, ForecastEntity todayWeather, Collection<ForecastPresentationDTO> dtos) {
-        if(todayWeather != null){
-            dtos.add(ForecastPresentationDTO.fromEntity(todayWeather));
-        }else{
-            ForecastEntity forecast = forecastDAO.findByNameAndDate(city, Date.valueOf(now));
-            if (forecast != null) {
-                cache.addIfNotPresent(todayKey, forecast);
-                dtos.add(ForecastPresentationDTO.fromEntity(forecast));
-            }
+    private void checkFromDbAndAddToCacheAndDtos(String city, LocalDate localDate, String key,Collection<ForecastPresentationDTO> dtos) {
+        ForecastEntity forecast = forecastDAO.findByNameAndDate(city, Date.valueOf(localDate));
+        if (forecast != null) {
+            cache.addIfNotPresent(key, forecast);
+            dtos.add(ForecastPresentationDTO.fromEntity(forecast));
         }
     }
 }

@@ -26,9 +26,9 @@ public class ForecastApiController {
         //TODO all responses from weather api documentation
         try{
             SaveStatus status = weatherService.saveCityForecast(city);
-            return new ResponseEntity<>(String.format("%s weather %s", status.name()), HttpStatus.OK);
+            return new ResponseEntity<>(String.format("%s weather %s", city, status.name()), HttpStatus.OK);
         }catch (ForecastLocationNotFoundException exc){
-            return new ResponseEntity<>(String.format("%s not found", city), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(String.format("%s not valid", city), HttpStatus.BAD_REQUEST);
         }catch (RuntimeException exc){
             return new ResponseEntity<>(String.format("error: %s", exc.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
