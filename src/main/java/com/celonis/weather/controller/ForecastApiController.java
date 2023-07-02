@@ -51,5 +51,4 @@ public class ForecastApiController {
         }
         return new ResponseEntity<>(forecasts, HttpStatus.OK);
     }
-
 }
