@@ -5,6 +5,8 @@ import com.celonis.weather.service.SaveStatus;
 import com.celonis.weather.service.IForecastService;
 import com.celonis.weather.service.exception.ForecastLocationNotFoundException;
 import com.celonis.weather.service.exception.WeatherApiException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,8 +52,11 @@ public class ForecastApiController {
 
     @GetMapping("/fetch")
     @ResponseBody public ResponseEntity<List<ForecastPresentationDTO>> getAllForecast(@RequestParam(value = "date", required = false)
-                                                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
-        List<ForecastPresentationDTO> forecasts = forecastService.fetchAllForecasts(date);
+                                                                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                                                                      @RequestParam(defaultValue = "0") int page,
+                                                                                      @RequestParam(defaultValue = "4") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        List<ForecastPresentationDTO> forecasts = forecastService.fetchAllForecasts(date, pageable);
         if (forecasts.size() == 0){
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }

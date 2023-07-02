@@ -10,6 +10,7 @@ import com.celonis.weather.service.exception.WeatherApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -113,7 +114,7 @@ public class ForecastService implements IForecastService {
     }
 
     @Override
-    public List<ForecastPresentationDTO> fetchAllForecasts(LocalDate date) {
+    public List<ForecastPresentationDTO> fetchAllForecasts(LocalDate date, Pageable pageable) {
         //Set<String> keys = cache.getAllKeys();
 
         LocalDate nowAsLocalDate = date != null ? date : LocalDate.now();
@@ -125,7 +126,7 @@ public class ForecastService implements IForecastService {
         //String todayAsString = now.toString();
         //String tomorrowAsString = tomorrow.toString();
 
-        List<ForecastEntity> forecasts = forecastDAO.findByDateInOrderByNameAscDateAsc(List.of(now, tomorrow));
+        List<ForecastEntity> forecasts = forecastDAO.findByDateInOrderByNameAscDateAsc(List.of(now, tomorrow), pageable);
 
         checkAndAddToCache(forecasts);
 
