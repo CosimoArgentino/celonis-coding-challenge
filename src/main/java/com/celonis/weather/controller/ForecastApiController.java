@@ -48,9 +48,9 @@ public class ForecastApiController {
     }
 
     @GetMapping("/fetch")
-    @ResponseBody public ResponseEntity<Set<ForecastPresentationDTO>> getAllForecast(@RequestParam(value = "date", required = false)
+    @ResponseBody public ResponseEntity<List<ForecastPresentationDTO>> getAllForecast(@RequestParam(value = "date", required = false)
                                                                                      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
-        Set<ForecastPresentationDTO> forecasts = forecastService.fetchAllForecasts(date);
+        List<ForecastPresentationDTO> forecasts = forecastService.fetchAllForecasts(date);
         if (forecasts.size() == 0){
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }

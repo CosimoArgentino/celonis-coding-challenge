@@ -17,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -110,22 +111,36 @@ public class ForecastService implements IForecastService {
     }
 
     @Override
-    public Set<ForecastPresentationDTO> fetchAllForecasts(LocalDate date) {
-        Set<String> keys = cache.getAllKeys();
+    public List<ForecastPresentationDTO> fetchAllForecasts(LocalDate date) {
+        //Set<String> keys = cache.getAllKeys();
 
-        LocalDate now = date != null ? date : LocalDate.now();
-        LocalDate tomorrow = now.plusDays(1);
+        LocalDate nowAsLocalDate = date != null ? date : LocalDate.now();
+        Date now = Date.valueOf(nowAsLocalDate);
+        Date tomorrow = Date.valueOf(nowAsLocalDate.plusDays(1));
 
         logger.trace(String.format("fetch all saved cities for date %s and %s", now.toString(), tomorrow.toString()));
 
-        String todayAsString = now.toString();
-        String tomorrowAsString = tomorrow.toString();
+        //String todayAsString = now.toString();
+        //String tomorrowAsString = tomorrow.toString();
 
+        List<ForecastEntity> forecasts = forecastDAO.findByDateInOrderByNameAscDateAsc(List.of(now, tomorrow));
+
+        checkAndAddToCache(forecasts);
+
+        return forecasts
+                .stream()
+                .map(f->ForecastPresentationDTO.fromEntity(f))
+                .collect(Collectors.toList());
+
+        /*
         SortedSet<ForecastPresentationDTO> forecasts = new TreeSet<>();
 
+        Set<String> citiesFound = new HashSet<>();
+        Set<String>
         for(String key : keys){
 
             String cityName = key.substring(10);
+            citiesFound.add(cityName);
             String todayKey = todayAsString+cityName;
             String tomorrowKey = tomorrowAsString+cityName;
 
@@ -149,7 +164,11 @@ public class ForecastService implements IForecastService {
             logger.trace(String.format("forecast %s found in cache for %s and date %s", tomorrowForecast != null ? "" : "not", cityName, tomorrow.toString()));
         }
 
+        forecastDAO.
+
         return forecasts;
+
+         */
     }
 
     private SaveStatus checkAndAddToCache(List<ForecastEntity> forecasts) {
