@@ -18,4 +18,5 @@ Just a few step:
 - ```bash
   mvn clean install
   ```
+- go to http://localhost:8080/swagger-ui/index.html to test the api using swagger
 - have fun!
