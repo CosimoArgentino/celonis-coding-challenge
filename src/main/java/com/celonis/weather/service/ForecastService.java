@@ -36,9 +36,9 @@ public class ForecastService implements IForecastService {
     }
 
     @Override
-    public SaveStatus saveCityForecast(String city) {
+    public SaveStatus saveCityForecast(String city, LocalDate date) {
 
-        LocalDate now = LocalDate.now();
+        LocalDate now = date != null ? date : LocalDate.now();
         String todayKey = now.toString() + city;
         String tomorrowKey = now.plusDays(1).toString() + city;
 
@@ -76,8 +76,8 @@ public class ForecastService implements IForecastService {
     }
 
     @Override
-    public List<ForecastPresentationDTO> fetchCityForecast(String city) {
-        LocalDate now = LocalDate.now();
+    public List<ForecastPresentationDTO> fetchCityForecast(String city, LocalDate date) {
+        LocalDate now = date != null ? date : LocalDate.now();
         LocalDate tomorrow = now.plusDays(1);
         String todayKey = now.toString() + city;
         String tomorrowKey = tomorrow.toString() + city;
@@ -103,10 +103,10 @@ public class ForecastService implements IForecastService {
     }
 
     @Override
-    public Set<ForecastPresentationDTO> fetchAllForecasts() {
+    public Set<ForecastPresentationDTO> fetchAllForecasts(LocalDate date) {
         Set<String> keys = cache.getAllKeys();
 
-        LocalDate now = LocalDate.now();
+        LocalDate now = date != null ? date : LocalDate.now();
         LocalDate tomorrow = now.plusDays(1);
         String todayAsString = now.toString();
         String tomorrowAsString = tomorrow.toString();

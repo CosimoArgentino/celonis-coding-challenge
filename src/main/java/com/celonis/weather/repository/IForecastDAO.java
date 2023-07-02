@@ -7,4 +7,5 @@ import java.sql.Date;
 
 public interface IForecastDAO extends JpaRepository<ForecastEntity, Long> {
     ForecastEntity findByNameAndDate(String name, Date date);
+    Long deleteByName(String name);
 }

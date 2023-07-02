@@ -4,10 +4,12 @@ import com.celonis.weather.dto.ForecastPresentationDTO;
 import com.celonis.weather.service.SaveStatus;
 import com.celonis.weather.service.IForecastService;
 import com.celonis.weather.service.exception.ForecastLocationNotFoundException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -15,17 +17,17 @@ import java.util.Set;
 @RequestMapping("/weather/forecast")
 public class ForecastApiController {
 
-    private IForecastService weatherService;
+    private IForecastService forecastService;
 
-    public ForecastApiController(IForecastService weatherService){
-        this.weatherService = weatherService;
+    public ForecastApiController(IForecastService forecastService){
+        this.forecastService = forecastService;
     }
 
     @PostMapping("/save/{city}")
-    public ResponseEntity<String> saveCityForecast(@PathVariable String city){
-        //TODO all responses from weather api documentation
+    public ResponseEntity<String> saveCityForecast(@PathVariable String city,
+                                                   @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
         try{
-            SaveStatus status = weatherService.saveCityForecast(city);
+            SaveStatus status = forecastService.saveCityForecast(city, date);
             return new ResponseEntity<>(String.format("%s weather %s", city, status.name()), HttpStatus.CREATED);
         }catch (ForecastLocationNotFoundException exc){
             return new ResponseEntity<>(String.format("%s not valid", city), HttpStatus.BAD_REQUEST);
@@ -35,8 +37,10 @@ public class ForecastApiController {
     }
 
     @GetMapping("/fetch/{city}")
-    @ResponseBody public ResponseEntity<List<ForecastPresentationDTO>> getForecastForCity(@PathVariable String city){
-        List<ForecastPresentationDTO> forecasts = weatherService.fetchCityForecast(city);
+    @ResponseBody public ResponseEntity<List<ForecastPresentationDTO>> getForecastForCity(@PathVariable String city,
+                                                                                          @RequestParam(value = "date", required = false)
+                                                                                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
+        List<ForecastPresentationDTO> forecasts = forecastService.fetchCityForecast(city, date);
         if (forecasts.size() == 0){
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
@@ -44,8 +48,9 @@ public class ForecastApiController {
     }
 
     @GetMapping("/fetch")
-    @ResponseBody public ResponseEntity<Set<ForecastPresentationDTO>> getAllForecast(){
-        Set<ForecastPresentationDTO> forecasts = weatherService.fetchAllForecasts();
+    @ResponseBody public ResponseEntity<Set<ForecastPresentationDTO>> getAllForecast(@RequestParam(value = "date", required = false)
+                                                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
+        Set<ForecastPresentationDTO> forecasts = forecastService.fetchAllForecasts(date);
         if (forecasts.size() == 0){
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
