@@ -10,6 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,17 +26,28 @@ public class ForecastApiIntegrationTest {
     private MockMvc mvc;
 
     @Test
-    public void testFetch_ExistingCity_status201() throws Exception {
+    public void testSave_ExistingCity_status201() throws Exception {
         mvc.perform(post("/weather/forecast/save/Madrid")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
     }
 
     @Test
-    public void testFetch_NotExistingCity_status400() throws Exception {
+    public void testSave_NotExistingCity_status400() throws Exception {
         mvc.perform(post("/weather/forecast/save/Disneyland")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testFetch_ExistingCity_status200() throws Exception {
+        mvc.perform(post("/weather/forecast/save/Madrid")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        mvc.perform(get("/weather/forecast/fetch/Madrid")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
 }
