@@ -4,7 +4,9 @@ import com.celonis.weather.model.forecast.ForecastEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface IWeatherDAO extends JpaRepository<ForecastEntity, Long> {
+import java.sql.Date;
 
+@Repository
+public interface IForecastDAO extends JpaRepository<ForecastEntity, Long> {
+    ForecastEntity findByNameAndDate(String name, Date date);
 }
