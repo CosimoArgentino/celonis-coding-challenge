@@ -24,7 +24,7 @@ public class ForecastService implements IForecastService {
 
     private final ICaffeineCache cache;
     private final static Logger logger = LoggerFactory.getLogger(ForecastService.class);
-    private IForecastDAO forecastDAO;
+    private final IForecastDAO forecastDAO;
     @Value("${apiKey}")
     private String apiKey;
     @Value("${weatherApi}")
@@ -48,8 +48,8 @@ public class ForecastService implements IForecastService {
         }
 
         RestTemplate restTemplate = new RestTemplate();
-        WeatherApiDTO weather;
         try {
+            logger.trace(String.format("fetch %s forecast from weather api", city));
             UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(weatherApi)
                     .queryParam("q",city)
                     .queryParam("days", 2)
@@ -58,7 +58,14 @@ public class ForecastService implements IForecastService {
                     .queryParam("key", apiKey);
 
             ResponseEntity<WeatherApiDTO> response = restTemplate.getForEntity(builder.toUriString(), WeatherApiDTO.class);
-            weather = response.getBody();
+            WeatherApiDTO weather = response.getBody();
+
+            List<ForecastEntity> forecastEntities = weather.toEntity();
+            SaveStatus status =  checkAndAddToCache(forecastEntities);
+
+            forecastDAO.saveAll(forecastEntities);
+
+            return status;
         }catch(RuntimeException exc){
             if(exc.getMessage().contains("No matching location found")){
                 String errorMessage = String.format("city %s not found on weather api", city);
@@ -68,38 +75,36 @@ public class ForecastService implements IForecastService {
             logger.error(String.format("error on fetching weather for %s, error message: %s", city, exc.getMessage()));
             throw exc;
         }
-
-        List<ForecastEntity> forecastEntities = weather.toEntity();
-        SaveStatus status =  checkAndAddToCache(forecastEntities);
-
-        forecastDAO.saveAll(forecastEntities);
-
-        return status;
     }
 
     @Override
     public List<ForecastPresentationDTO> fetchCityForecast(String city, LocalDate date) {
         LocalDate now = date != null ? date : LocalDate.now();
         LocalDate tomorrow = now.plusDays(1);
+        logger.trace(String.format("fetch forecast for %s and dates %s, %s", city, now.toString(), tomorrow.toString()));
         String todayKey = now.toString() + city;
         String tomorrowKey = tomorrow.toString() + city;
 
-        ForecastEntity todayWeather = cache.getIfPresent(todayKey);
-        ForecastEntity tomorrowWeather = cache.getIfPresent(tomorrowKey);
+        ForecastEntity todayForecast = cache.getIfPresent(todayKey);
+        ForecastEntity tomorrowForecast = cache.getIfPresent(tomorrowKey);
 
         List<ForecastPresentationDTO> dtos = new ArrayList<>();
 
-        if (todayWeather != null){
-            dtos.add(ForecastPresentationDTO.fromEntity(todayWeather));
+        if (todayForecast != null){
+            dtos.add(ForecastPresentationDTO.fromEntity(todayForecast));
         }else{
             checkFromDbAndAddToCacheAndDtos(city, now, todayKey, dtos);
         }
 
-        if (tomorrowWeather != null){
-            dtos.add(ForecastPresentationDTO.fromEntity(tomorrowWeather));
+        logger.trace(String.format("forecast %s found in cache for %s and date %s", todayForecast != null ? "" : "not", city, now.toString()));
+
+        if (tomorrowForecast != null){
+            dtos.add(ForecastPresentationDTO.fromEntity(tomorrowForecast));
         }else{
             checkFromDbAndAddToCacheAndDtos(city, tomorrow, tomorrowKey, dtos);
         }
+
+        logger.trace(String.format("forecast %s found in cache for %s and date %s", tomorrowForecast != null ? "" : "not", city, tomorrow.toString()));
 
         return dtos;
     }
@@ -110,6 +115,9 @@ public class ForecastService implements IForecastService {
 
         LocalDate now = date != null ? date : LocalDate.now();
         LocalDate tomorrow = now.plusDays(1);
+
+        logger.trace(String.format("fetch all saved cities for date %s and %s", now.toString(), tomorrow.toString()));
+
         String todayAsString = now.toString();
         String tomorrowAsString = tomorrow.toString();
 
@@ -130,22 +138,25 @@ public class ForecastService implements IForecastService {
                 checkFromDbAndAddToCacheAndDtos(cityName, now, todayKey, forecasts);
             }
 
+            logger.trace(String.format("forecast %s found in cache for %s and date %s", todayForecast != null ? "" : "not", cityName, now.toString()));
+
             if(tomorrowForecast != null){
                 forecasts.add(ForecastPresentationDTO.fromEntity(tomorrowForecast));
             }else{
                 checkFromDbAndAddToCacheAndDtos(cityName, tomorrow, tomorrowKey, forecasts);
             }
+
+            logger.trace(String.format("forecast %s found in cache for %s and date %s", tomorrowForecast != null ? "" : "not", cityName, tomorrow.toString()));
         }
 
         return forecasts;
     }
 
     private SaveStatus checkAndAddToCache(List<ForecastEntity> forecasts) {
-        SaveStatus status = SaveStatus.SAVED;
+        SaveStatus status = SaveStatus.SKIPPED;
         for (ForecastEntity f : forecasts) {
             String key = f.getDate().toString() + f.getName();
-            //the get operation insert only if the key is not present
-            if (cache.getIfPresent(key) != null) {
+            if (cache.getIfPresent(key) == null) {
                 status = SaveStatus.SAVED;
             }
             cache.addIfNotPresent(key, f);
