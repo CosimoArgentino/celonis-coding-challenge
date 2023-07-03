@@ -58,7 +58,7 @@ public class ForecastApiController {
         Pageable pageable = PageRequest.of(page, size);
         List<ForecastPresentationDTO> forecasts = forecastService.fetchAllForecasts(date, pageable);
         if (forecasts.size() == 0){
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(forecasts, HttpStatus.OK);
         }
         return new ResponseEntity<>(forecasts, HttpStatus.OK);
     }

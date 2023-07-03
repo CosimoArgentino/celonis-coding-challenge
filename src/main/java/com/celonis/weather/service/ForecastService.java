@@ -7,8 +7,6 @@ import com.celonis.weather.model.forecast.ForecastEntity;
 import com.celonis.weather.repository.IForecastDAO;
 import com.celonis.weather.service.exception.ForecastLocationNotFoundException;
 import com.celonis.weather.service.exception.WeatherApiException;
-import jakarta.persistence.Tuple;
-import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,9 +25,13 @@ import java.util.stream.Collectors;
 @Service
 public class ForecastService implements IForecastService {
 
+    //redis would be preferred
     private final ICaffeineCache cache;
+
+    private final RestTemplate restTemplate;
     private final static Logger logger = LoggerFactory.getLogger(ForecastService.class);
     private final IForecastDAO forecastDAO;
+
     @Value("${apiKey}")
     private String apiKey;
     @Value("${weatherApi}")
@@ -38,6 +40,7 @@ public class ForecastService implements IForecastService {
     public ForecastService(IForecastDAO forecastDAO, ICaffeineCache caffeineCache){
         this.forecastDAO = forecastDAO;
         this.cache = caffeineCache;
+        this.restTemplate = new RestTemplate();
     }
 
     @Override
@@ -54,7 +57,6 @@ public class ForecastService implements IForecastService {
 
         //if it's saved just one day, it's not important because the weather api does not take a range date,
         //the system will fetch the weather for two days in any case
-        RestTemplate restTemplate = new RestTemplate();
         try {
             logger.trace(String.format("fetch %s forecast from weather api", city));
             UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(weatherApi)
