@@ -7,6 +7,8 @@ import com.celonis.weather.model.forecast.ForecastEntity;
 import com.celonis.weather.repository.IForecastDAO;
 import com.celonis.weather.service.exception.ForecastLocationNotFoundException;
 import com.celonis.weather.service.exception.WeatherApiException;
+import jakarta.persistence.Tuple;
+import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +52,8 @@ public class ForecastService implements IForecastService {
             return SaveStatus.SKIPPED;
         }
 
+        //if it's saved just one day, it's not important because the weather api does not take a range date,
+        //the system will fetch the weather for two days in any case
         RestTemplate restTemplate = new RestTemplate();
         try {
             logger.trace(String.format("fetch %s forecast from weather api", city));
@@ -113,18 +117,24 @@ public class ForecastService implements IForecastService {
         return dtos;
     }
 
+    class TupleForecast{
+        String city;
+        Date date;
+
+        TupleForecast(String city, Date date){
+            this.city = city;
+            this.date = date;
+        }
+    }
+
     @Override
     public List<ForecastPresentationDTO> fetchAllForecasts(LocalDate date, Pageable pageable) {
-        //Set<String> keys = cache.getAllKeys();
 
         LocalDate nowAsLocalDate = date != null ? date : LocalDate.now();
         Date now = Date.valueOf(nowAsLocalDate);
         Date tomorrow = Date.valueOf(nowAsLocalDate.plusDays(1));
 
         logger.trace(String.format("fetch all saved cities for date %s and %s", now.toString(), tomorrow.toString()));
-
-        //String todayAsString = now.toString();
-        //String tomorrowAsString = tomorrow.toString();
 
         List<ForecastEntity> forecasts = forecastDAO.findByDateInOrderByNameAscDateAsc(List.of(now, tomorrow), pageable);
 
@@ -135,15 +145,20 @@ public class ForecastService implements IForecastService {
                 .map(f->ForecastPresentationDTO.fromEntity(f))
                 .collect(Collectors.toList());
 
+
         /*
+        Set<String> keys = cache.getAllKeys();
+
+        String todayAsString = now.toString();
+        String tomorrowAsString = tomorrow.toString();
+
         SortedSet<ForecastPresentationDTO> forecasts = new TreeSet<>();
 
-        Set<String> citiesFound = new HashSet<>();
-        Set<String>
+        List<TupleForecast> pairsFounded = new ArrayList<>();
+
         for(String key : keys){
 
             String cityName = key.substring(10);
-            citiesFound.add(cityName);
             String todayKey = todayAsString+cityName;
             String tomorrowKey = tomorrowAsString+cityName;
 
@@ -152,26 +167,30 @@ public class ForecastService implements IForecastService {
 
             if(todayForecast != null){
                 forecasts.add(ForecastPresentationDTO.fromEntity(todayForecast));
-            }else{
-                checkFromDbAndAddToCacheAndDtos(cityName, now, todayKey, forecasts);
+                pairsFounded.add(new TupleForecast(cityName, now));
             }
 
             logger.trace(String.format("forecast %s found in cache for %s and date %s", todayForecast != null ? "" : "not", cityName, now.toString()));
 
             if(tomorrowForecast != null){
                 forecasts.add(ForecastPresentationDTO.fromEntity(tomorrowForecast));
-            }else{
-                checkFromDbAndAddToCacheAndDtos(cityName, tomorrow, tomorrowKey, forecasts);
+                pairsFounded.add(new TupleForecast(cityName, tomorrow));
             }
 
             logger.trace(String.format("forecast %s found in cache for %s and date %s", tomorrowForecast != null ? "" : "not", cityName, tomorrow.toString()));
         }
 
-        forecastDAO.
+        forecastDAO.findByNameAndDateNotInTuple;
+
+        addAll();
+
+        updateCache;
 
         return forecasts;
 
          */
+
+
     }
 
     private SaveStatus checkAndAddToCache(List<ForecastEntity> forecasts) {
