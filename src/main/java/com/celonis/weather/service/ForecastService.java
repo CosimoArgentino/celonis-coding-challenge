@@ -117,16 +117,6 @@ public class ForecastService implements IForecastService {
         return dtos;
     }
 
-    class TupleForecast{
-        String city;
-        Date date;
-
-        TupleForecast(String city, Date date){
-            this.city = city;
-            this.date = date;
-        }
-    }
-
     @Override
     public List<ForecastPresentationDTO> fetchAllForecasts(LocalDate date, Pageable pageable) {
 
@@ -144,52 +134,6 @@ public class ForecastService implements IForecastService {
                 .stream()
                 .map(f->ForecastPresentationDTO.fromEntity(f))
                 .collect(Collectors.toList());
-
-
-        /*
-        Set<String> keys = cache.getAllKeys();
-
-        String todayAsString = now.toString();
-        String tomorrowAsString = tomorrow.toString();
-
-        SortedSet<ForecastPresentationDTO> forecasts = new TreeSet<>();
-
-        List<TupleForecast> pairsFounded = new ArrayList<>();
-
-        for(String key : keys){
-
-            String cityName = key.substring(10);
-            String todayKey = todayAsString+cityName;
-            String tomorrowKey = tomorrowAsString+cityName;
-
-            ForecastEntity todayForecast = cache.getIfPresent(todayKey);
-            ForecastEntity tomorrowForecast = cache.getIfPresent(tomorrowKey);
-
-            if(todayForecast != null){
-                forecasts.add(ForecastPresentationDTO.fromEntity(todayForecast));
-                pairsFounded.add(new TupleForecast(cityName, now));
-            }
-
-            logger.trace(String.format("forecast %s found in cache for %s and date %s", todayForecast != null ? "" : "not", cityName, now.toString()));
-
-            if(tomorrowForecast != null){
-                forecasts.add(ForecastPresentationDTO.fromEntity(tomorrowForecast));
-                pairsFounded.add(new TupleForecast(cityName, tomorrow));
-            }
-
-            logger.trace(String.format("forecast %s found in cache for %s and date %s", tomorrowForecast != null ? "" : "not", cityName, tomorrow.toString()));
-        }
-
-        forecastDAO.findByNameAndDateNotInTuple;
-
-        addAll();
-
-        updateCache;
-
-        return forecasts;
-
-         */
-
 
     }
 
